@@ -307,10 +307,10 @@ class HTTPClient(object):
         if rawdoc:
             return response
 
-        # Make sure the response looks like valid xml, otherwise assume that
+        # Make sure the response has an XML Content-Type, otherwise assume that
         # this is a file download an return the content of the response.
         content = response.content
-        if not util.isXML(content):
+        if not self._isXMLContentType(response):
             return content
 
         # Parse XML document.
@@ -330,6 +330,13 @@ class HTTPClient(object):
 
         # Cache response and return rObjProxy instance.
         return self.cache(self, uri, root, parent=parent, cache=cache)
+
+    def _isXMLContentType(self, response):
+        try:
+            return response.getheader('Content-Type').endswith('/xml')
+        except AttributeError:
+            # no Content-Type header, fall back to looking for XML declaration
+            return util.isXML(response.content)
 
     def do_GET(self, *args, **kwargs):
         """

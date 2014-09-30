@@ -17,6 +17,7 @@
 
 import os
 import logging
+from robj.lib import util as rutil
 from threading import Thread
 from BaseHTTPServer import HTTPServer
 from BaseHTTPServer import BaseHTTPRequestHandler
@@ -90,7 +91,12 @@ class RESTRequestHandler(BaseHTTPRequestHandler):
                 return
 
             self.send_response(response.code)
-            self.send_header('Content-type', 'text/xml')
+
+            if rutil.isXML(response.message):
+                self.send_header('Content-type', 'text/xml')
+            else:
+                self.send_header('Content-type', 'application/octet-stream')
+
             self.send_header('Content-length', len(response.message))
 
             # write any headers specified by the response
